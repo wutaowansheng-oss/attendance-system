@@ -1,0 +1,109 @@
+{% extends "attendance/base.html" %}
+
+{% block content %}
+<div class="row">
+  <div class="col-md-6">
+    <h2>Class Settings</h2>
+  </div>
+  <div class="col-md-6 text-end">
+    <a href="{% url 'attendance:detailed_log' %}" class="btn btn-secondary btn-sm">← Back to Log</a>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header bg-primary text-white">
+    <h5 class="mb-0">⚙️ Configure Class Timing</h5>
+  </div>
+  <div class="card-body">
+    <form method="post">
+      {% csrf_token %}
+      
+      <div class="mb-4">
+        <label for="class_start_time" class="form-label"><strong>Class Start Time</strong></label>
+        <input 
+          type="time" 
+          id="class_start_time" 
+          name="class_start_time" 
+          class="form-control form-control-lg" 
+          value="{{ settings.class_start_time|time:'H:i' }}"
+          required
+        >
+        <small class="form-text text-muted">Default: 8:00 AM</small>
+      </div>
+
+      <div class="mb-4">
+        <label for="late_threshold_minutes" class="form-label"><strong>Late Threshold (minutes)</strong></label>
+        <input 
+          type="number" 
+          id="late_threshold_minutes" 
+          name="late_threshold_minutes" 
+          class="form-control form-control-lg" 
+          value="{{ settings.late_threshold_minutes }}"
+          min="1"
+          max="180"
+          required
+        >
+        <small class="form-text text-muted">Students who arrive after this many minutes from start time will be marked as Absent. Default: 30 minutes</small>
+      </div>
+
+      <div class="alert alert-info mt-4">
+        <h6>📋 Current Logic:</h6>
+        <ul class="mb-0">
+          <li><strong>Present:</strong> Login at or before <span class="badge bg-success">{{ settings.class_start_time|time:"h:i A" }}</span></li>
+          <li><strong>Late:</strong> Login between <span class="badge bg-success">{{ settings.class_start_time|time:"h:i A" }}</span> and <span class="badge bg-warning">{{ settings.class_start_time|time:"h:i A" }} + {{ settings.late_threshold_minutes }} min</span></li>
+          <li><strong>Absent:</strong> Login after <span class="badge bg-danger">{{ settings.class_start_time|time:"h:i A" }} + {{ settings.late_threshold_minutes }} min</span></li>
+        </ul>
+      </div>
+
+      <button type="submit" class="btn btn-success btn-lg">
+        💾 Save Settings
+      </button>
+      <a href="{% url 'attendance:detailed_log' %}" class="btn btn-secondary btn-lg">Cancel</a>
+    </form>
+  </div>
+</div>
+
+<div class="card mt-4">
+  <div class="card-header bg-secondary text-white">
+    <h5 class="mb-0">📝 Example Scenarios</h5>
+  </div>
+  <div class="card-body">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Scenario</th>
+          <th>Login Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Student arrives on time</td>
+          <td>{{ settings.class_start_time|time:"h:i A" }}</td>
+          <td><span class="badge bg-success">Present</span></td>
+        </tr>
+        <tr>
+          <td>Student arrives 15 minutes late</td>
+          <td>
+            {% with "0:15" as delta %}
+              {{ settings.class_start_time|time:"h:i A" }}
+            {% endwith %}
+            (estimated)
+          </td>
+          <td><span class="badge bg-warning text-dark">Late</span></td>
+        </tr>
+        <tr>
+          <td>Student arrives 45 minutes late (beyond threshold)</td>
+          <td>
+            {% with "0:45" as delta %}
+              {{ settings.class_start_time|time:"h:i A" }}
+            {% endwith %}
+            (estimated)
+          </td>
+          <td><span class="badge bg-danger">Absent</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

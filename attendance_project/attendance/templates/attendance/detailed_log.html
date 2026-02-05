@@ -1,0 +1,102 @@
+{% extends "attendance/base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+  <div class="col-md-8">
+    <h2>Detailed Attendance Log</h2>
+  </div>
+  <div class="col-md-4 text-end">
+    <a href="{% url 'attendance:class_settings' %}" class="btn btn-info btn-sm">⚙️ Class Settings</a>
+  </div>
+</div>
+
+<div class="card mb-4">
+  <div class="card-body">
+    <form method="get" class="row g-3">
+      <div class="col-md-6">
+        <label for="filter_date" class="form-label">Filter by Date:</label>
+        <input type="date" id="filter_date" name="date" class="form-control" value="{{ filter_date }}">
+      </div>
+      <div class="col-md-6">
+        <label for="filter_student" class="form-label">Filter by Student Name:</label>
+        <input type="text" id="filter_student" name="student" class="form-control" placeholder="Student name..." value="{{ filter_student }}">
+      </div>
+      <div class="col-12">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{% url 'attendance:detailed_log' %}" class="btn btn-secondary">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="alert alert-info">
+  <strong>Class Start Time:</strong> {{ settings.class_start_time|time:"h:i A" }}<br>
+  <strong>Late Threshold:</strong> {{ settings.late_threshold_minutes }} minutes<br>
+  <small>
+    • <span class="badge bg-success">Present:</span> Login before or at {{ settings.class_start_time|time:"h:i A" }}<br>
+    • <span class="badge bg-warning">Late:</span> Login between {{ settings.class_start_time|time:"h:i A" }} and {{ settings.late_threshold_minutes }} minutes after<br>
+    • <span class="badge bg-danger">Absent:</span> Login after {{ settings.late_threshold_minutes }} minutes
+  </small>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-hover table-bordered">
+    <thead class="table-dark">
+      <tr>
+        <th>Date</th>
+        <th>Student Name</th>
+        <th>Student ID</th>
+        <th>Login Time</th>
+        <th>Status</th>
+        <th>Remarks</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for att in attendances %}
+        <tr>
+          <td><strong>{{ att.date }}</strong></td>
+          <td>{{ att.student.name }}</td>
+          <td>{{ att.student.student_id }}</td>
+          <td>
+            {% if att.login_time %}
+              {{ att.login_time|time:"h:i A" }}
+            {% else %}
+              <span class="text-muted">N/A</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if att.status == 'present' %}
+              <span class="badge bg-success">Present</span>
+            {% elif att.status == 'late' %}
+              <span class="badge bg-warning text-dark">Late</span>
+            {% else %}
+              <span class="badge bg-danger">Absent</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if att.status == 'present' %}
+              On time
+            {% elif att.status == 'late' %}
+              Arrived late. Time threshold: {{ settings.late_threshold_minutes }} minutes
+            {% else %}
+              Did not arrive within the late threshold window
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="6" class="text-center text-muted">No attendance records found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="row mt-4">
+  <div class="col-12">
+    <small class="text-muted">
+      Total Records: {{ attendances|length }}
+    </small>
+  </div>
+</div>
+{% endblock %}

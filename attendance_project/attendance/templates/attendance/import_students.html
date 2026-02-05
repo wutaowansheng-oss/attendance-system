@@ -1,0 +1,19 @@
+{% extends 'attendance/base.html' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card">
+        <div class="card-body">
+          <h3 class="card-title">Import Students (CSV)</h3>
+          <p class="text-muted">Upload a CSV with columns: <strong>name, student_id, email</strong>.</p>
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">{{ form.csv_file.label_tag }}{{ form.csv_file }}</div>
+            <button class="btn btn-primary" type="submit">Upload</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}

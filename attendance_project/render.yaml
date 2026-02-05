@@ -1,0 +1,25 @@
+# Render infra-as-code for attendance-system
+# Adjust values (region, repo) as needed before applying.
+
+services:
+  - type: web
+    name: attendance-system
+    env: python
+    repo: https://github.com/wutaowansheng-oss/attendance-system.git
+    branch: main
+    plan: free
+    buildCommand: ./build.sh
+    startCommand: gunicorn attendance_project.wsgi:application
+    releaseCommand: >
+      python manage.py migrate && \
+      python manage.py collectstatic --noinput && \
+      python manage.py shell -c "from attendance.models import Teacher; Teacher.objects.get_or_create(teacher_id='admin', defaults={'name':'Admin Teacher','pin':'admin123456'}); Teacher.objects.get_or_create(teacher_id='123456', defaults={'name':'Teacher','pin':'232209'})"
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: attendance_project.settings
+
+databases:
+  - name: attendance-db
+    plan: free
+    region: oregon
+    databaseName: attendance
