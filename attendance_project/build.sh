@@ -20,6 +20,10 @@ python manage.py migrate --verbosity 2
 
 echo "==> Migrations completed successfully"
 
+# Create superuser if it doesn't exist
+echo "==> Creating superuser account..."
+python manage.py create_superuser_if_not_exists
+
 # Create admin teacher if it doesn't exist
 echo "==> Creating teacher accounts..."
 python manage.py shell -c "
