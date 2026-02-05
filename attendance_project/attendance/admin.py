@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Attendance
+from .models import Student, Attendance, Teacher
 
 @admin.register(Student)
 class StudentAdmin(admin.ModelAdmin):
@@ -12,4 +12,7 @@ class AttendanceAdmin(admin.ModelAdmin):
     list_filter = ("date", "status")
     search_fields = ("student__name", "student__student_id")
 
-# Teacher management moved to custom view to avoid admin template issues
+@admin.register(Teacher)
+class TeacherAdmin(admin.ModelAdmin):
+    list_display = ("teacher_id", "name", "pin")
+    search_fields = ("teacher_id", "name")
