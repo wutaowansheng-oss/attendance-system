@@ -8,9 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-for-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-# Allow all onrender.com subdomains plus localhost for development
-_default_hosts = 'localhost,127.0.0.1,*.onrender.com'
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default=_default_hosts, cast=Csv())
+# ALLOWED_HOSTS is managed by middleware to handle dynamic render.com domains
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
 # CSRF settings for Render deployment
 CSRF_TRUSTED_ORIGINS = [
@@ -30,6 +29,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "attendance_project.middleware.AllowRenderDomainsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
